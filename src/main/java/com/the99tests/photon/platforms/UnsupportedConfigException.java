@@ -1,4 +1,4 @@
-package com.preenos.photon.platforms;
+package com.the99tests.photon.platforms;
 
 public class UnsupportedConfigException extends Exception {
 

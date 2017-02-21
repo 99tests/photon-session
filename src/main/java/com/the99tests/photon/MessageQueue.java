@@ -1,4 +1,4 @@
-package com.preenos.photon;
+package com.the99tests.photon;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;

@@ -1,4 +1,4 @@
-package com.preenos.photon.platforms;
+package com.the99tests.photon.platforms;
 
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -7,9 +7,10 @@ import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.preenos.photon.DataStore;
-import com.preenos.photon.PhotonDriver;
+import com.the99tests.photon.DataStore;
+import com.the99tests.photon.PhotonSession;
 
 public class AndroidManager extends PlatformManager {
 
@@ -25,7 +26,7 @@ public class AndroidManager extends PlatformManager {
 	}
 	
 	@Override
-	public void setupDriver(PhotonDriver driver) {
+	public void setupDriver(RemoteWebDriver driver) {
 		super.setupDriver(driver);
 		driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
 	}

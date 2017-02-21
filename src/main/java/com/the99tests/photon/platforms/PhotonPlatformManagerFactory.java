@@ -1,12 +1,12 @@
-package com.preenos.photon.platforms;
+package com.the99tests.photon.platforms;
 
 import java.net.URL;
 import java.util.HashMap;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.preenos.photon.DataStore;
-import com.preenos.photon.PhotonDriver;
+import com.the99tests.photon.DataStore;
+import com.the99tests.photon.PhotonSession;
 
 public class PhotonPlatformManagerFactory {
 	private static HashMap<String, PlatformManager> browserConfigs=new HashMap<String, PlatformManager>();

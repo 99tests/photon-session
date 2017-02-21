@@ -1,4 +1,4 @@
-package com.preenos.photon.platforms;
+package com.the99tests.photon.platforms;
 
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -11,13 +11,13 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.preenos.photon.DataStore;
-import com.preenos.photon.PhotonDriver;
+import com.the99tests.photon.DataStore;
+import com.the99tests.photon.PhotonSession;
 
-public class FirefoxManager extends PlatformManager {
+public class ChromeManager extends PlatformManager {
 	@Override
-	public DesiredCapabilities setupCapabilities(URL hub, String platform, DataStore store) {
-		DesiredCapabilities capability=DesiredCapabilities.firefox();
+	public DesiredCapabilities setupCapabilities(URL hub, String platform, DataStore storeßß) {
+		DesiredCapabilities capability=DesiredCapabilities.chrome();
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable(LogType.BROWSER, Level.ALL);
 		capability.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
@@ -29,7 +29,7 @@ public class FirefoxManager extends PlatformManager {
 	}
 	
 	@Override
-	public void setupDriver(PhotonDriver driver) {
+	public void setupDriver(RemoteWebDriver driver) {
 		super.setupDriver(driver);
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
@@ -41,6 +41,6 @@ public class FirefoxManager extends PlatformManager {
 
 	@Override
 	public LogEntries getLogs() {
-		return null;
+		return driver.manage().logs().get(LogType.BROWSER);
 	}
 }

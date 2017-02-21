@@ -1,4 +1,4 @@
-package com.preenos.photon.platforms;
+package com.the99tests.photon.platforms;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -7,16 +7,16 @@ import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.preenos.photon.DataStore;
-import com.preenos.photon.PhotonDriver;
+import com.the99tests.photon.DataStore;
+import com.the99tests.photon.PhotonSession;
 
 
 public abstract class PlatformManager {
-	protected PhotonDriver driver;
+	protected RemoteWebDriver driver;
 	
 	public abstract DesiredCapabilities setupCapabilities(URL hub, String platform, DataStore store);
 	
-	public void setupDriver(PhotonDriver driver) {
+	public void setupDriver(RemoteWebDriver driver) {
 		this.driver=driver;
 	}
 	

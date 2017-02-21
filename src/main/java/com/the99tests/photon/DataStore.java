@@ -1,4 +1,4 @@
-package com.preenos.photon;
+package com.the99tests.photon;
 
 import redis.clients.jedis.Jedis;
 

@@ -1,4 +1,4 @@
-package com.preenos.photon;
+package com.the99tests.photon;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.fluent.Request;
 import org.json.JSONObject;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.OutputType;
@@ -25,17 +27,13 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.HttpCommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.preenos.photon.platforms.PlatformManager;
-import com.preenos.photon.platforms.PhotonPlatformManagerFactory;
-import com.preenos.photon.platforms.UnsupportedConfigException;
+import com.the99tests.photon.platforms.PhotonPlatformManagerFactory;
+import com.the99tests.photon.platforms.PlatformManager;
+import com.the99tests.photon.platforms.UnsupportedConfigException;
 
 import redis.clients.jedis.Jedis;
 
-public class PhotonDriver extends RemoteWebDriver {
+public class PhotonSession {
 	private static DataStore store;
     private static String HUB;
     private static String taskId;
@@ -45,34 +43,31 @@ public class PhotonDriver extends RemoteWebDriver {
     private static String browser;
     private static PlatformManager platformManager;
     private static MessageQueue messageQueue;
+    private static RemoteWebDriver driver;
     
     public static boolean isLocal() {
     	String taskId=System.getProperty("photonTaskId");
     	return (taskId==null);
     }
     
-    public static PhotonDriver createDriver(URL hub, Capabilities desiredCapabilities) throws IOException, TimeoutException, UnsupportedConfigException {
-    	if(isLocal()) {
-    		return new PhotonDriver(hub, desiredCapabilities);
-    	} else {
-    		setupPhotonEnvironment();
-    		
-    		platformManager=PhotonPlatformManagerFactory.getPlatformManager(browser, platform);
-    		
-    		URL hubUrl=new URL("http://"+HUB+":4444/wd/hub");
-    		desiredCapabilities=getTaskCapabilities(hubUrl);
-    		
-    		PhotonDriver driver=new PhotonDriver(hubUrl, desiredCapabilities);
-    		platformManager.setupDriver(driver);
-    		driver.sendSessionInfo();
-    		return driver;
-    	}
+    public static RemoteWebDriver createDriver() throws IOException, TimeoutException, UnsupportedConfigException {
+		setupPhotonEnvironment();
+		
+		platformManager=PhotonPlatformManagerFactory.getPlatformManager(browser, platform);
+		
+		URL hubUrl=new URL("http://"+HUB+":4444/wd/hub");
+		Capabilities desiredCapabilities=getTaskCapabilities(hubUrl);
+		
+		driver=new RemoteWebDriver(hubUrl, desiredCapabilities);
+		platformManager.setupDriver(driver);
+		sendSessionInfo();
+		return driver;
     }
     
-    private PhotonDriver(URL hub, Capabilities desiredCapabilities) {
-    	super(hub, desiredCapabilities);
-    	this.beginTest();
+    public static void useLocalDriver(RemoteWebDriver webDriver) {
+    	driver=webDriver;
     }
+    
     
     public static void setupPhotonEnvironment() throws IOException, TimeoutException {
     	taskId = System.getProperty("photonTaskId");
@@ -103,27 +98,32 @@ public class PhotonDriver extends RemoteWebDriver {
         return platformManager.setupCapabilities(hubUrl, platform, store);
     }
     
-    public void sendSessionInfo() {
-    	store.setTaskProperty("session_id", this.getSessionId().toString());
+    public static void sendSessionInfo() {
+    	store.setTaskProperty("session_id", driver.getSessionId().toString());
     	try {
-	        HttpResponse<JsonNode> jsonResponse = 
-	        		Unirest.get("http://"+HUB+":4444/grid/api/testsession?session="+this.getSessionId().toString()).asJson();
-	        JSONObject sessionInfo=jsonResponse.getBody().getObject();
+	    	String uri="http://"+HUB+":4444/grid/api/testsession?session="+driver.getSessionId().toString();
+	    	String response=Request.Get(uri).execute().returnContent().asString();
+	        JSONObject sessionInfo=new JSONObject(response);
+
+
 	        String nodeUrl=sessionInfo.getString("proxyId");
 	        System.out.println("Session Id: "+nodeUrl);
 	
 	        store.setTaskProperty("node_url", nodeUrl);
 	
 	        JSONObject data=new JSONObject();
-	        data.put("session_id", this.getSessionId().toString());
+	        data.put("session_id", driver.getSessionId().toString());
 	        data.put("node_url", nodeUrl);
 	        messageQueue.sendStatus("script_session_established", data);
-    	} catch(UnirestException e) {
+    	} catch(ClientProtocolException e) {
+    		e.printStackTrace();
+    	} catch(IOException e) {
     		e.printStackTrace();
     	}
+    	
     }
     
-	public PhotonDriver() throws IOException, TimeoutException {
+	public PhotonSession() throws IOException, TimeoutException {
 		store = new DataStore(taskId);
         HUB = store.getConfigProperty("HUB");
         runId = store.getTaskProperty("testrun_id");
@@ -135,9 +135,9 @@ public class PhotonDriver extends RemoteWebDriver {
         messageQueue=new MessageQueue(runId, taskId);
 	}
 	
-    public void checkpoint(String slug) {
+    public static void checkpoint(String slug) {
     	if(isLocal()) {
-    		File f=this.getScreenshotAs(OutputType.FILE);
+    		File f=driver.getScreenshotAs(OutputType.FILE);
     		try {
     			FileUtils.copyFile(f, new File("photon_"+slug+".png"));
     	    } catch(IOException e) {
@@ -148,7 +148,7 @@ public class PhotonDriver extends RemoteWebDriver {
     	
     	platformManager.logCheckpoint(slug);
 
-        File f=this.getScreenshotAs(OutputType.FILE);
+        File f=driver.getScreenshotAs(OutputType.FILE);
         try {
            FileUtils.copyFile(f, new File(dataDir+"/"+slug+".png"));
         } catch(IOException e) {
@@ -164,22 +164,21 @@ public class PhotonDriver extends RemoteWebDriver {
         messageQueue.sendStatus("test_checkpoint", details);
     }
 
-    public void beginTest() {
+    public static void beginTest() {
     	if(isLocal())
     		return;
         checkpoint("begin_test");
     }
 
-    public void endTest() {
+    public static void endTest() {
     	if(isLocal())
     		return;
         checkpoint("end_test");
     }
     
-    public void quit() {
-    	this.endTest();
+    public static void quit() {
     	if(isLocal()) {
-    		super.quit();
+    		driver.quit();
     		return;
     	}
     	
@@ -210,7 +209,7 @@ public class PhotonDriver extends RemoteWebDriver {
 		store.setTaskProperty("test_complete", "true");
 		messageQueue.sendStatus("test_complete", null);
        
-        super.quit();
+		driver.quit();
 
 		store.setTaskProperty("test_teardown_failed", "false");
 
