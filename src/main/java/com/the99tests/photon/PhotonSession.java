@@ -50,7 +50,7 @@ public class PhotonSession {
     	return (taskId==null);
     }
     
-    public static RemoteWebDriver createDriver() throws IOException, TimeoutException, UnsupportedConfigException {
+    public static RemoteWebDriver setupPhotonSession() throws IOException, TimeoutException, UnsupportedConfigException {
 		setupPhotonEnvironment();
 		
 		platformManager=PhotonPlatformManagerFactory.getPlatformManager(browser, platform);
@@ -64,7 +64,7 @@ public class PhotonSession {
 		return driver;
     }
     
-    public static void useLocalDriver(RemoteWebDriver webDriver) {
+    public static void setupLocalSession(RemoteWebDriver webDriver) {
     	driver=webDriver;
     }
     
@@ -176,9 +176,8 @@ public class PhotonSession {
         checkpoint("end_test");
     }
     
-    public static void quit() {
+    public static void closeSession() {
     	if(isLocal()) {
-    		driver.quit();
     		return;
     	}
     	
@@ -198,7 +197,6 @@ public class PhotonSession {
 		try {
 			Files.write(logFile, lines, Charset.forName("UTF-8"));	   
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
@@ -209,8 +207,6 @@ public class PhotonSession {
 		store.setTaskProperty("test_complete", "true");
 		messageQueue.sendStatus("test_complete", null);
        
-		driver.quit();
-
 		store.setTaskProperty("test_teardown_failed", "false");
 
 		messageQueue.sendStatus("script_complete", null);
@@ -218,10 +214,8 @@ public class PhotonSession {
 		try {
 			messageQueue.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TimeoutException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
