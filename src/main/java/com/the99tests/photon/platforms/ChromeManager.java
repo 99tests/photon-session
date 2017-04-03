@@ -29,8 +29,8 @@ public class ChromeManager extends PlatformManager {
 	}
 	
 	@Override
-	public void setupDriver(RemoteWebDriver driver) {
-		super.setupDriver(driver);
+	public void setupDriver(URL hub, DesiredCapabilities capabilities) {
+		super.setupDriver(hub, capabilities);
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
 	

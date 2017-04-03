@@ -4,9 +4,35 @@
 	<groupId>com.the99tests.photon</groupId>
 	<artifactId>photon-session</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.0</version>
-	<name>runner</name>
-	<url>http://maven.apache.org</url>
+	<version>1.0.1</version>
+
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>Library for integrating tests with the 99 Tests Automation platform</description>
+	<url>>https://99tests.com/automation</url>
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Mahadevan K</name>
+			<email>maha@99tests.com</email>
+			<organization>Preenos Crowd Technologies Private Limited</organization>
+			<organizationUrl>http://99tests.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/99tests/photon-session</connection>
+		<developerConnection>scm:git:ssh://github.com/99tests/photon-session</developerConnection>
+		<url>https://github.com/99tests/photon-session/tree/master</url>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -49,9 +75,38 @@
 			<artifactId>fluent-hc</artifactId>
 			<version>4.5.2</version>
 		</dependency>
+		<dependency>
+			<groupId>io.appium</groupId>
+			<artifactId>java-client</artifactId>
+			<version>2.2.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>

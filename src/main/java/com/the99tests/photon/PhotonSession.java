@@ -50,25 +50,27 @@ public class PhotonSession {
     	return (taskId==null);
     }
     
-    public static RemoteWebDriver setupPhotonSession() throws IOException, TimeoutException, UnsupportedConfigException {
+    public static <T extends RemoteWebDriver> T getNativeDriver() {
+    	return platformManager.getNativeDriver();
+    }
+    
+    public static void setupPhotonSession() throws IOException, TimeoutException, UnsupportedConfigException {
 		setupPhotonEnvironment();
 		
 		platformManager=PhotonPlatformManagerFactory.getPlatformManager(browser, platform);
 		
 		URL hubUrl=new URL("http://"+HUB+":4444/wd/hub");
-		Capabilities desiredCapabilities=getTaskCapabilities(hubUrl);
+		DesiredCapabilities desiredCapabilities=getTaskCapabilities(hubUrl);
 		
-		driver=new RemoteWebDriver(hubUrl, desiredCapabilities);
-		platformManager.setupDriver(driver);
+		platformManager.setupDriver(hubUrl, desiredCapabilities);
+		driver=platformManager.getNativeDriver();
 		sendSessionInfo();
-		return driver;
     }
     
     public static void setupLocalSession(RemoteWebDriver webDriver) {
     	driver=webDriver;
     }
-    
-    
+        
     public static void setupPhotonEnvironment() throws IOException, TimeoutException {
     	taskId = System.getProperty("photonTaskId");
     	if(taskId==null) {  		

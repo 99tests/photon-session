@@ -12,8 +12,11 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.the99tests.photon.DataStore;
 import com.the99tests.photon.PhotonSession;
 
-public class AndroidManager extends PlatformManager {
+import io.appium.java_client.android.AndroidDriver;
 
+public class AndroidManager extends PlatformManager {
+	private AndroidDriver nativeDriver;
+	
 	@Override
 	public DesiredCapabilities setupCapabilities(URL hub, String platform, DataStore store) {
 		DesiredCapabilities capabilities=new DesiredCapabilities();
@@ -26,8 +29,14 @@ public class AndroidManager extends PlatformManager {
 	}
 	
 	@Override
-	public void setupDriver(RemoteWebDriver driver) {
-		super.setupDriver(driver);
+	public <T extends RemoteWebDriver> T getNativeDriver() {
+		return (T)nativeDriver;
+	}
+	
+	@Override
+	public void setupDriver(URL hub, DesiredCapabilities capabilities) {
+		nativeDriver=new AndroidDriver(hub, capabilities);
+		super.setupNativeDriver(nativeDriver);
 		driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
 	}
 

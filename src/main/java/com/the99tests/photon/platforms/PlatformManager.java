@@ -16,8 +16,16 @@ public abstract class PlatformManager {
 	
 	public abstract DesiredCapabilities setupCapabilities(URL hub, String platform, DataStore store);
 	
-	public void setupDriver(RemoteWebDriver driver) {
+	protected <T extends RemoteWebDriver> void setupNativeDriver(T driver) {
 		this.driver=driver;
+	}
+	
+	public void setupDriver(URL hub, DesiredCapabilities capabilities) {
+		driver=new RemoteWebDriver(hub, capabilities);
+	}
+	
+	public <T extends RemoteWebDriver> T getNativeDriver() {
+		return (T)driver;
 	}
 	
 	public abstract void logCheckpoint(String checkpoint);
