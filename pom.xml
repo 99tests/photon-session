@@ -4,7 +4,7 @@
 	<groupId>com.the99tests.photon</groupId>
 	<artifactId>photon-session</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Library for integrating tests with the 99 Tests Automation platform</description>
@@ -32,6 +32,17 @@
 		<developerConnection>scm:git:ssh://github.com/99tests/photon-session</developerConnection>
 		<url>https://github.com/99tests/photon-session/tree/master</url>
 	</scm>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 
 	<dependencies>
 		<dependency>

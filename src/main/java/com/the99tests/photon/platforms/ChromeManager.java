@@ -16,15 +16,13 @@ import com.the99tests.photon.PhotonSession;
 
 public class ChromeManager extends PlatformManager {
 	@Override
-	public DesiredCapabilities setupCapabilities(URL hub, String platform, DataStore storeßß) {
+	public DesiredCapabilities setupCapabilities(URL hub, String platform, DataStore store) {
 		DesiredCapabilities capability=DesiredCapabilities.chrome();
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable(LogType.BROWSER, Level.ALL);
 		capability.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 		capability.setCapability(CapabilityType.PLATFORM, platform);
-		//RemoteWebDriver driver = new RemoteWebDriver(hub, capability);
-		//driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-		
+
 		return capability;
 	}
 	

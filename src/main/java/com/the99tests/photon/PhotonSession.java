@@ -16,6 +16,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.OutputType;
@@ -34,6 +35,12 @@ import com.the99tests.photon.platforms.UnsupportedConfigException;
 import redis.clients.jedis.Jedis;
 
 public class PhotonSession {
+	@SuppressWarnings("unused") // convenience URL for testers
+	private static final String PLAYGROUND_HUB_URL="http://52.66.6.164:4444/wd/hub";
+	
+	private static final String PLAYGROUND_HUB="52.66.6.164";
+	private static final String DAEMON_API_BASE="http://35.154.244.239";
+	
 	private static DataStore store;
     private static String HUB;
     private static String taskId;
@@ -67,6 +74,32 @@ public class PhotonSession {
 		sendSessionInfo();
     }
     
+    public static void setupTestPlaygroundSession(RemoteWebDriver webDriver) throws ClientProtocolException, IOException, InterruptedException {
+    	driver=webDriver;
+    	String uri="http://"+PLAYGROUND_HUB+":4444/grid/api/testsession?session="+driver.getSessionId().toString();
+    	String response=Request.Get(uri).execute().returnContent().asString();
+        JSONObject sessionInfo=new JSONObject(response);
+        
+        String privateNodeUrl=new URL(sessionInfo.getString("proxyId")).getHost();
+        
+        JSONObject params=new JSONObject();
+        params.put("private_ip", privateNodeUrl);
+        
+        response=Request.Post(DAEMON_API_BASE+"/publicip/")
+        		.bodyString(params.toString(), ContentType.APPLICATION_JSON)
+        		.execute().returnContent().asString();
+        
+        JSONObject publicIpInfo=new JSONObject(response);
+
+        System.out.println("-----------------------------------------");
+        System.out.println("99tests - Test Playground Session");
+        System.out.println("You can view the test executing live via VNC");
+        System.out.println("VNC Url: vnc://"+publicIpInfo.getString("publicip"));
+        System.out.println("VNC password: 99tests123");
+        System.out.println("-----------------------------------------");
+        Thread.sleep(5000);
+    }
+        
     public static void setupLocalSession(RemoteWebDriver webDriver) {
     	driver=webDriver;
     }
@@ -85,6 +118,8 @@ public class PhotonSession {
         String params[]=config.split("_");
         browser=params[0];
         platform=params[1];
+        
+        System.out.println("Platform is "+platform+", browser is "+browser);
 
         dataDir="/tmp/"+taskId;
         
@@ -92,12 +127,8 @@ public class PhotonSession {
     }
     
     public static DesiredCapabilities getTaskCapabilities(URL hubUrl) throws MalformedURLException, UnsupportedConfigException {
-    	String config=store.getTaskProperty("platform");
-        String params[]=config.split("_");
-        String browser=params[0];
-        String platform=params[1];
-        
-        return platformManager.setupCapabilities(hubUrl, platform, store);
+        return platformManager.setupCapabilities(hubUrl, 
+        		PhotonPlatformManagerFactory.getGridPlatformName(platform), store);
     }
     
     public static void sendSessionInfo() {

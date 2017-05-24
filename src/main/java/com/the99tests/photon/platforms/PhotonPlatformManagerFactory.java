@@ -22,11 +22,17 @@ public class PhotonPlatformManagerFactory {
 		platforms.put("android", "ANDROID");
 	}
 	
-	public static PlatformManager getPlatformManager(String browser, String platform) throws UnsupportedConfigException {
+	public static String getGridPlatformName(String platform) throws UnsupportedConfigException {
 		String gridPlatform=platforms.get(platform);
 		if(gridPlatform==null) {
-			throw new UnsupportedConfigException("Unknown browser '"+browser+"'");
+			throw new UnsupportedConfigException("Unknown platform '"+platform+"'");
 		}
+		
+		return gridPlatform;
+	}
+	
+	public static PlatformManager getPlatformManager(String browser, String platform) throws UnsupportedConfigException {
+		
 		
 		PlatformManager browserConfig=browserConfigs.get(browser);
 		if(browserConfig==null) {
@@ -35,33 +41,4 @@ public class PhotonPlatformManagerFactory {
 
 		return browserConfig;
 	}
-	
-	/*
-	public static DesiredCapabilities getCapabilities(URL hub, String browser, String platform, DataStore store) throws UnsupportedConfigException {
-		String gridPlatform=platforms.get(platform);
-		if(gridPlatform==null) {
-			throw new UnsupportedConfigException("Unknown browser '"+browser+"'");
-		}
-		
-		PlatformManager browserConfig=browserConfigs.get(browser);
-		if(browserConfig==null) {
-			throw new UnsupportedConfigException("Unknown browser '"+browser+"'");
-		}
-
-		return browserConfig.setupCapabilities(hub, gridPlatform, store);
-	}
-	
-	public static void setupDriver(PhotonDriver driver, String browser, String platform, DataStore store) throws UnsupportedConfigException {
-		String gridPlatform=platforms.get(platform);
-		if(gridPlatform==null) {
-			throw new UnsupportedConfigException("Unknown browser '"+browser+"'");
-		}
-		
-		PlatformManager browserConfig=browserConfigs.get(browser);
-		if(browserConfig==null) {
-			throw new UnsupportedConfigException("Unknown browser '"+browser+"'");
-		}
-		
-		browserConfig.setupDriver(driver);
-	}*/
 }

@@ -22,8 +22,6 @@ public class FirefoxManager extends PlatformManager {
 		logPrefs.enable(LogType.BROWSER, Level.ALL);
 		capability.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 		capability.setCapability(CapabilityType.PLATFORM, platform);
-		//RemoteWebDriver driver = new RemoteWebDriver(hub, capability);
-		//driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 		
 		return capability;
 	}
