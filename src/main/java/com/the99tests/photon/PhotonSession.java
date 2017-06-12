@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
@@ -27,6 +28,16 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.HttpCommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.reflections.Reflections;
+import org.testng.TestNG;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
+import org.testng.collections.Lists;
+import org.testng.reporters.ExitCodeListener;
+import org.testng.reporters.VerboseReporter;
+import org.testng.xml.XmlClass;
+import org.testng.xml.XmlSuite;
+import org.testng.xml.XmlTest;
 
 import com.the99tests.photon.platforms.PhotonPlatformManagerFactory;
 import com.the99tests.photon.platforms.PlatformManager;
@@ -52,16 +63,101 @@ public class PhotonSession {
     private static MessageQueue messageQueue;
     private static RemoteWebDriver driver;
     
-    public static boolean isLocal() {
+    public static abstract class PhotonSuite<T extends RemoteWebDriver> extends PhotonSuiteBase {
+    	protected T driver;
+
+    	public enum PhotonTestEnvironment {
+    		LOCAL,
+    		PLAYGROUND
+    	}
+    	
+    	protected PhotonTestEnvironment getEnvironment() {
+    		return PhotonTestEnvironment.LOCAL;
+    	}
+    	
+    	protected abstract T setupLocalWebDriver() throws Exception;
+    	protected abstract T setupPlaygroundWebDriver() throws Exception;
+    	
+        @BeforeSuite
+        protected final void setupSuite() throws Exception {
+        	if(PhotonSession.isLocal()) {
+    	    	if(getEnvironment()==PhotonTestEnvironment.LOCAL) {
+    	    		driver=setupLocalWebDriver();
+    	    		PhotonSession.setupLocalSession(driver);
+    	    	}
+    	    	if(getEnvironment()==PhotonTestEnvironment.PLAYGROUND) {
+    	    		driver=setupPlaygroundWebDriver();
+    	    		PhotonSession.setupTestPlaygroundSession(driver);
+    	    	}
+        	} else {
+        		PhotonSession.setupPhotonSession();
+    			driver=PhotonSession.getNativeDriver();
+        	}
+        }
+        
+        @AfterSuite
+        protected final void teardownSuite() {
+        	PhotonSession.closeSession();
+        	driver.close();
+        }
+    }
+    
+    public static class PhotonTestRunner {
+    	public static Set<Class<? extends PhotonSuite>> getTestSuiteClasses() {
+    		Reflections reflections=new Reflections("com.the99tests.photon.tests");
+    		Set<Class<? extends PhotonSuite>> suites=reflections.getSubTypesOf(PhotonSuite.class);
+    		return suites;
+    	}
+    	
+    	public static void main(String[] args) throws IOException {
+    		TestNG testng = new TestNG();
+    		
+    		Set<Class<? extends PhotonSuite>> suiteClasses=getTestSuiteClasses();
+    		if(suiteClasses.size()!=1) {
+    			System.out.println("ERROR: Each test much have exactly one test suite");
+    			System.exit(1);
+    		}
+    		Class<? extends PhotonSuite> suiteClass=suiteClasses.iterator().next();
+    		
+    		XmlSuite suite = new XmlSuite();
+    		suite.setName(suiteClass.getSimpleName()+" Suite");
+
+    		XmlTest test = new XmlTest(suite);
+    		test.setName(suiteClass.getSimpleName()+" Test");
+    		
+    		List<XmlClass> classes = new ArrayList<XmlClass>();
+    		classes.add(new XmlClass(suiteClass.getName()));
+    		test.setXmlClasses(classes) ;
+    		
+    		testng.setUseDefaultListeners(false);
+    		testng.addListener(new VerboseReporter());
+    		testng.addListener(new ExitCodeListener());
+    		List<XmlSuite> suites = Lists.newArrayList();
+    		suites.add(suite);//path to xml..
+    		testng.setXmlSuites(suites);
+    		testng.run();
+    		
+    		System.out.println(testng.getStatus());
+    		if(testng.hasFailure() || testng.hasSkip()) {
+    			System.out.println("FAILED");
+    			System.exit(1);
+    		} else {
+    			System.out.println("PASSED");
+    			System.exit(0);
+    		}
+    	}
+    }
+    
+    private static boolean isLocal() {
     	String taskId=System.getProperty("photonTaskId");
     	return (taskId==null);
     }
     
-    public static <T extends RemoteWebDriver> T getNativeDriver() {
+    private static <T extends RemoteWebDriver> T getNativeDriver() {
     	return platformManager.getNativeDriver();
     }
     
-    public static void setupPhotonSession() throws IOException, TimeoutException, UnsupportedConfigException {
+    private static void setupPhotonSession() throws IOException, TimeoutException, UnsupportedConfigException {
 		setupPhotonEnvironment();
 		
 		platformManager=PhotonPlatformManagerFactory.getPlatformManager(browser, platform);
@@ -74,7 +170,7 @@ public class PhotonSession {
 		sendSessionInfo();
     }
     
-    public static void setupTestPlaygroundSession(RemoteWebDriver webDriver) throws ClientProtocolException, IOException, InterruptedException {
+    private static void setupTestPlaygroundSession(RemoteWebDriver webDriver) throws ClientProtocolException, IOException, InterruptedException {
     	driver=webDriver;
     	String uri="http://"+PLAYGROUND_HUB+":4444/grid/api/testsession?session="+driver.getSessionId().toString();
     	String response=Request.Get(uri).execute().returnContent().asString();
@@ -100,11 +196,19 @@ public class PhotonSession {
         Thread.sleep(5000);
     }
         
-    public static void setupLocalSession(RemoteWebDriver webDriver) {
+    private static void setupLocalSession(RemoteWebDriver webDriver) {
     	driver=webDriver;
     }
+    
+    private static void setupTestRunSubmission(int enterpriseCycle, int device, String apiKey, String apiSecret) {
+    	/*
+    	 * TODO: Create test run on the server with parameters
+    	 * 
+    	 * Setup request id
+    	 */
+    }
         
-    public static void setupPhotonEnvironment() throws IOException, TimeoutException {
+    private static void setupPhotonEnvironment() throws IOException, TimeoutException {
     	taskId = System.getProperty("photonTaskId");
     	if(taskId==null) {  		
     		return;
@@ -126,12 +230,12 @@ public class PhotonSession {
         messageQueue=new MessageQueue(runId, taskId);
     }
     
-    public static DesiredCapabilities getTaskCapabilities(URL hubUrl) throws MalformedURLException, UnsupportedConfigException {
+    private static DesiredCapabilities getTaskCapabilities(URL hubUrl) throws MalformedURLException, UnsupportedConfigException {
         return platformManager.setupCapabilities(hubUrl, 
         		PhotonPlatformManagerFactory.getGridPlatformName(platform), store);
     }
     
-    public static void sendSessionInfo() {
+    private static void sendSessionInfo() {
     	store.setTaskProperty("session_id", driver.getSessionId().toString());
     	try {
 	    	String uri="http://"+HUB+":4444/grid/api/testsession?session="+driver.getSessionId().toString();
@@ -170,6 +274,9 @@ public class PhotonSession {
 	
     public static void checkpoint(String slug) {
     	if(isLocal()) {
+    		/*
+    		 * TODO: if submission is turned on upload screenshot to S3/upload to platform
+    		 */
     		File f=driver.getScreenshotAs(OutputType.FILE);
     		try {
     			FileUtils.copyFile(f, new File("photon_"+slug+".png"));
@@ -211,6 +318,9 @@ public class PhotonSession {
     
     public static void closeSession() {
     	if(isLocal()) {
+    		/*
+    		 * TODO: if submission is turned on, then upload log files as well
+    		 */
     		return;
     	}
     	
