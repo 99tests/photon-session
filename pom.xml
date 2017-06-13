@@ -4,7 +4,7 @@
 	<groupId>com.the99tests.photon</groupId>
 	<artifactId>photon-session</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.4</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Library for integrating tests with the 99 Tests Automation platform</description>
