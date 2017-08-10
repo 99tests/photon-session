@@ -4,7 +4,7 @@
 	<groupId>com.the99tests.photon</groupId>
 	<artifactId>photon-session</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.4</version>
+	<version>1.0.8</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Library for integrating tests with the 99 Tests Automation platform</description>
@@ -77,16 +77,6 @@
 			<version>4.12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>fluent-hc</artifactId>
-			<version>4.5.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.11</version>
@@ -105,6 +95,11 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>6.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>3.8.1</version>
 		</dependency>
 	</dependencies>
 	<build>
