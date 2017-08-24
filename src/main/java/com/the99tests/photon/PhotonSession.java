@@ -474,6 +474,7 @@ public class PhotonSession {
 	}
 	
     public void checkpoint(String slug) throws Exception {
+    	Thread.sleep(2000);
     	if(shouldVerifyCheckpoints) {
     		String[] checkpointParts=slug.split("_");
     		String checkpointName=checkpointParts[checkpointParts.length-1];
