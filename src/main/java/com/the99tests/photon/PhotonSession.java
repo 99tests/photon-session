@@ -756,7 +756,7 @@ public class PhotonSession {
     
     
     //Switch to a tab by its index.
-    public void switchTabIndex(int p )
+    public void switchToTab(int p )
 	{
 		ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
 		driver.switchTo().window(tabs.get(p-1));
@@ -788,7 +788,9 @@ public class PhotonSession {
 					System.out.println(
 							linkUrl + " - " + httpURLConnect.getResponseMessage() + " - This is a valid link.");
 				}
-				if (httpURLConnect.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+				//(httpURLConnect.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) 
+				else
+				{
 					System.out.println(linkUrl + " - " + httpURLConnect.getResponseMessage() + " - "
 							+ HttpURLConnection.HTTP_NOT_FOUND);
 				}
@@ -797,8 +799,8 @@ public class PhotonSession {
 			} 
 		}
     } 
-    //Scroll down
-    public void scrollDown()
+  //Scroll down
+    public void scrollToBottom()
     {
     	((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight)");
     }
@@ -818,7 +820,12 @@ public class PhotonSession {
     	String pixel2 = ")";
     	((JavascriptExecutor) driver).executeScript(pixel1 + -pixel + pixel2);
     }
-    
+  //Scroll up to header
+    public void scrollToTop()
+    {
+    	((JavascriptExecutor) driver).executeScript("window.scrollTo(0, -document.body.scrollHeight)");
+    }  
+  
     
 }
 
