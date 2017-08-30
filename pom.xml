@@ -4,11 +4,15 @@
 	<groupId>com.the99tests.photon</groupId>
 	<artifactId>photon-session</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.8</version>
+	<version>1.0.9-SNAPSHOT</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Library for integrating tests with the 99 Tests Automation platform</description>
 	<url>>https://99tests.com/automation</url>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
 
 	<licenses>
 		<license>
