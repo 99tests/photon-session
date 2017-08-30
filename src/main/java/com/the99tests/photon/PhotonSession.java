@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -36,12 +37,16 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.reflections.Reflections;
 import org.testng.TestNG;
 import org.testng.annotations.AfterSuite;
@@ -721,4 +726,106 @@ public class PhotonSession {
     	System.out.println("Tests aborted");
     	System.exit(1);
     }
+    //Select drop down menu by visible text
+    public void selectByVisibleText(WebElement we, String VisibleText){
+    	Select select = new Select(we);
+    	select.selectByVisibleText(VisibleText);
+    }
+    //Open a new Tab/Window and switch to it.
+    public void openNewTab()
+	{   
+		
+		String CH = driver.getWindowHandle();
+		
+		JavascriptExecutor js =(JavascriptExecutor)driver;
+		js.executeScript("window.open();");
+		
+		ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
+		for(String t: tabs)
+		{
+			if(t.equals(CH))
+			{
+				int Cix= tabs.indexOf(CH);
+				
+				driver.switchTo().window(tabs.get(Cix+1));
+				break;
+			}
+		}
+	}
+
+    
+    
+    //Switch to a tab by its index.
+    public void switchToTab(int p )
+	{
+		ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
+		driver.switchTo().window(tabs.get(p-1));
+	}
+    
+    //Verify the response of all the links in current page.
+    public void verifyIfAllLinksActive()
+	{
+    	List<WebElement> links=driver.findElements(By.tagName("a"));
+		System.out.println("Total links are "+links.size());
+		ArrayList<String> Urls = new ArrayList<String>();
+		for(WebElement e: links)
+		{
+			
+			String url= e.getAttribute("href");	
+			Urls.add(url);
+		}
+        for (String linkUrl: Urls) {
+			try {
+				URL url = new URL(linkUrl);
+
+				HttpURLConnection httpURLConnect = (HttpURLConnection) url.openConnection();
+
+				httpURLConnect.setConnectTimeout(3000);
+
+				httpURLConnect.connect();
+
+				if (httpURLConnect.getResponseCode() == 200) {
+					System.out.println(
+							linkUrl + " - " + httpURLConnect.getResponseMessage() + " - This is a valid link.");
+				}
+				//(httpURLConnect.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) 
+				else
+				{
+					System.out.println(linkUrl + " - " + httpURLConnect.getResponseMessage() + " - "
+							+ HttpURLConnection.HTTP_NOT_FOUND);
+				}
+			} catch (Exception e) {
+
+			} 
+		}
+    } 
+  //Scroll down
+    public void scrollToBottom()
+    {
+    	((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight)");
+    }
+    
+  //Scroll down by pixel
+    public void scrollDownByPixel(int pixel)
+    {
+    	String pixel1 = "window.scrollBy(0,";
+    	String pixel2 = ")";
+    	((JavascriptExecutor) driver).executeScript(pixel1 + pixel+ pixel2);
+    }
+    
+  //Scroll Up by pixel
+    public void scrollUpByPixel(int pixel)
+    {
+    	String pixel1 = "window.scrollBy(0,";
+    	String pixel2 = ")";
+    	((JavascriptExecutor) driver).executeScript(pixel1 + -pixel + pixel2);
+    }
+  //Scroll up to header
+    public void scrollToTop()
+    {
+    	((JavascriptExecutor) driver).executeScript("window.scrollTo(0, -document.body.scrollHeight)");
+    }  
+  
+    
 }
+
