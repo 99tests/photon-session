@@ -1,5 +1,8 @@
 package com.the99tests.photon;
 
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,8 +42,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
@@ -825,7 +830,21 @@ public class PhotonSession {
     {
     	((JavascriptExecutor) driver).executeScript("window.scrollTo(0, -document.body.scrollHeight)");
     }  
+    
+  //Mouse Hover on an element
+    public void mouseHoverOn(WebElement webelement)
+    {
+    	Actions action = new Actions(driver);
+    	action.moveToElement(webelement).build().perform();
+    }
+    
+    public String getTestDataPath(String fileName){
+    	
+		return Paths.get(".").toAbsolutePath().normalize().toString()+"testdata/"+fileName;
+    	
+    }
   
+
     
 }
 
