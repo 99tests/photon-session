@@ -40,6 +40,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -788,8 +789,11 @@ public class PhotonSession {
 				httpURLConnect.setConnectTimeout(3000);
 
 				httpURLConnect.connect();
+				System.out.println(linkUrl + " - " + httpURLConnect.getResponseMessage());
+				Assert.assertEquals(httpURLConnect.getResponseCode() == 200, true);
+				
 
-				if (httpURLConnect.getResponseCode() == 200) {
+				/*if (httpURLConnect.getResponseCode() == 200) {
 					System.out.println(
 							linkUrl + " - " + httpURLConnect.getResponseMessage() + " - This is a valid link.");
 				}
@@ -798,11 +802,13 @@ public class PhotonSession {
 				{
 					System.out.println(linkUrl + " - " + httpURLConnect.getResponseMessage() + " - "
 							+ HttpURLConnection.HTTP_NOT_FOUND);
-				}
+				}*/
 			} catch (Exception e) {
 
 			} 
+			
 		}
+        System.out.println("All links are valid and rechable");
     } 
   //Scroll down
     public void scrollToBottom()
@@ -838,6 +844,7 @@ public class PhotonSession {
     	action.moveToElement(webelement).build().perform();
     }
     
+    //file upload under send keys
     public String getTestDataPath(String fileName){
     	
 		return Paths.get(".").toAbsolutePath().normalize().toString()+"testdata/"+fileName;
