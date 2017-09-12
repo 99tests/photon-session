@@ -40,7 +40,6 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -769,7 +768,7 @@ public class PhotonSession {
 	}
     
     //Verify the response of all the links in current page.
-    public void verifyIfAllLinksActive()
+    public boolean verifyIfAllLinksActive()
 	{
     	List<WebElement> links=driver.findElements(By.tagName("a"));
 		System.out.println("Total links are "+links.size());
@@ -779,7 +778,9 @@ public class PhotonSession {
 			
 			String url= e.getAttribute("href");	
 			Urls.add(url);
+			
 		}
+		boolean value = true;
         for (String linkUrl: Urls) {
 			try {
 				URL url = new URL(linkUrl);
@@ -789,27 +790,29 @@ public class PhotonSession {
 				httpURLConnect.setConnectTimeout(3000);
 
 				httpURLConnect.connect();
-				System.out.println(linkUrl + " - " + httpURLConnect.getResponseMessage());
-				Assert.assertEquals(httpURLConnect.getResponseCode() == 200, true);
 				
-
-				/*if (httpURLConnect.getResponseCode() == 200) {
-					System.out.println(
-							linkUrl + " - " + httpURLConnect.getResponseMessage() + " - This is a valid link.");
+				boolean result = httpURLConnect.getResponseCode() == 200;
+				
+				if (result== true) {
+					
 				}
-				//(httpURLConnect.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) 
 				else
 				{
 					System.out.println(linkUrl + " - " + httpURLConnect.getResponseMessage() + " - "
 							+ HttpURLConnection.HTTP_NOT_FOUND);
-				}*/
+					value = false;
+					
+				}
 			} catch (Exception e) {
 
 			} 
-			
 		}
-        System.out.println("All links are valid and rechable");
+		return value;
+		
+		
     } 
+    
+    
   //Scroll down
     public void scrollToBottom()
     {
