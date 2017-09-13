@@ -850,7 +850,7 @@ public class PhotonSession {
     //file upload under send keys
     public String getTestDataPath(String fileName){
     	
-		return Paths.get(".").toAbsolutePath().normalize().toString()+"testdata/"+fileName;
+		return Paths.get(".").toAbsolutePath().normalize().toString()+"/testdata/"+fileName;
     	
     }
   
