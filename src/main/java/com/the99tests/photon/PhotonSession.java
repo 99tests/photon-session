@@ -726,7 +726,7 @@ public class PhotonSession {
     
     private void quit(String message) {
     	if(driver!=null) 
-    		driver.close();
+    		driver.quit();
     	System.out.println(message);
     	System.out.println("Tests aborted");
     	System.exit(1);
@@ -768,7 +768,7 @@ public class PhotonSession {
 	}
     
     //Verify the response of all the links in current page.
-    public void verifyIfAllLinksActive()
+    public boolean verifyIfAllLinksActive()
 	{
     	List<WebElement> links=driver.findElements(By.tagName("a"));
 		System.out.println("Total links are "+links.size());
@@ -778,7 +778,9 @@ public class PhotonSession {
 			
 			String url= e.getAttribute("href");	
 			Urls.add(url);
+			
 		}
+		boolean value = true;
         for (String linkUrl: Urls) {
 			try {
 				URL url = new URL(linkUrl);
@@ -788,22 +790,29 @@ public class PhotonSession {
 				httpURLConnect.setConnectTimeout(3000);
 
 				httpURLConnect.connect();
-
-				if (httpURLConnect.getResponseCode() == 200) {
-					System.out.println(
-							linkUrl + " - " + httpURLConnect.getResponseMessage() + " - This is a valid link.");
+				
+				boolean result = httpURLConnect.getResponseCode() == 200;
+				
+				if (result== true) {
+					
 				}
-				//(httpURLConnect.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) 
 				else
 				{
 					System.out.println(linkUrl + " - " + httpURLConnect.getResponseMessage() + " - "
 							+ HttpURLConnection.HTTP_NOT_FOUND);
+					value = false;
+					
 				}
 			} catch (Exception e) {
 
 			} 
 		}
+		return value;
+		
+		
     } 
+    
+    
   //Scroll down
     public void scrollToBottom()
     {
@@ -838,9 +847,10 @@ public class PhotonSession {
     	action.moveToElement(webelement).build().perform();
     }
     
+    //file upload under send keys
     public String getTestDataPath(String fileName){
     	
-		return Paths.get(".").toAbsolutePath().normalize().toString()+"testdata/"+fileName;
+		return Paths.get(".").toAbsolutePath().normalize().toString()+"/testdata/"+fileName;
     	
     }
   
