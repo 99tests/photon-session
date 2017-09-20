@@ -726,7 +726,7 @@ public class PhotonSession {
     
     private void quit(String message) {
     	if(driver!=null) 
-    		driver.close();
+    		driver.quit();
     	System.out.println(message);
     	System.out.println("Tests aborted");
     	System.exit(1);
